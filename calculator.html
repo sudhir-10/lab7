@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematical Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .calculator-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-operation {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .btn-operation:hover {
+            background-color: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-operation:active {
+            transform: translateY(0);
+        }
+
+        .btn-clear {
+            grid-column: 1 / -1;
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background-color: #ee5a52;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .result-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        #result {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            word-wrap: break-word;
+            min-height: 40px;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .success {
+            color: #51cf66;
+        }
+
+        .info-text {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .calculator-container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+
+            #result {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>🧮 Calculator</h1>
+        
+        <form id="calculatorForm">
+            <div class="form-group">
+                <label for="number1">First Number</label>
+                <input 
+                    type="number" 
+                    id="number1" 
+                    placeholder="Enter first number" 
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="number2">Second Number</label>
+                <input 
+                    type="number" 
+                    id="number2" 
+                    placeholder="Enter second number" 
+                    required
+                >
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn-operation" onclick="calculate('add')">
+                    ➕ Add
+                </button>
+                <button type="button" class="btn-operation" onclick="calculate('subtract')">
+                    ➖ Subtract
+                </button>
+                <button type="button" class="btn-operation" onclick="calculate('multiply')">
+                    ✖️ Multiply
+                </button>
+                <button type="button" class="btn-operation" onclick="calculate('divide')">
+                    ➗ Divide
+                </button>
+                <button type="button" class="btn-clear" onclick="clearCalculator()">
+                    Clear
+                </button>
+            </div>
+        </form>
+
+        <div class="result-box">
+            <div class="result-label">Result</div>
+            <div id="result">0</div>
+        </div>
+
+        <div class="info-text">
+            Enter two numbers and click an operation button to calculate
+        </div>
+    </div>
+
+    <script>
+        // Get references to form elements
+        const number1Input = document.getElementById('number1');
+        const number2Input = document.getElementById('number2');
+        const resultDisplay = document.getElementById('result');
+
+        // Main calculation function
+        function calculate(operation) {
+            // Get values from inputs
+            const num1 = parseFloat(number1Input.value);
+            const num2 = parseFloat(number2Input.value);
+
+            // Validate inputs
+            if (isNaN(num1) || isNaN(num2)) {
+                displayError('Please enter valid numbers');
+                return;
+            }
+
+            let result;
+
+            // Perform calculation based on operation
+            switch(operation) {
+                case 'add':
+                    result = num1 + num2;
+                    break;
+                case 'subtract':
+                    result = num1 - num2;
+                    break;
+                case 'multiply':
+                    result = num1 * num2;
+                    break;
+                case 'divide':
+                    if (num2 === 0) {
+                        displayError('Cannot divide by zero');
+                        return;
+                    }
+                    result = num1 / num2;
+                    break;
+                default:
+                    displayError('Invalid operation');
+                    return;
+            }
+
+            // Display result
+            displayResult(result);
+        }
+
+        // Display result
+        function displayResult(result) {
+            resultDisplay.textContent = result.toFixed(2);
+            resultDisplay.className = 'success';
+        }
+
+        // Display error message
+        function displayError(message) {
+            resultDisplay.textContent = message;
+            resultDisplay.className = 'error';
+        }
+
+        // Clear calculator
+        function clearCalculator() {
+            number1Input.value = '';
+            number2Input.value = '';
+            resultDisplay.textContent = '0';
+            resultDisplay.className = '';
+            number1Input.focus();
+        }
+
+        // Allow Enter key to calculate
+        document.getElementById('calculatorForm').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                calculate('add');
+            }
+        });
+
+        // Focus on first input on page load
+        window.addEventListener('load', function() {
+            number1Input.focus();
+        });
+    </script>
+</body>
+</html>
